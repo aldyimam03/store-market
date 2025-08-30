@@ -21,6 +21,7 @@ const testConnection = async () => {
   try {
     await sequelize.authenticate();
     console.log("Connection has been established successfully.");
+    console.log(`Running in ${process.env.NODE_ENV} mode`); 
   } catch (error) {
     console.error("Unable to connect to the database:", error.message);
   }
