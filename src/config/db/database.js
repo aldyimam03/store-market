@@ -7,7 +7,7 @@ if (process.env.NODE_ENV === "production") {
   dbConfig = {
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME_PROD,
+    database: process.env.DB_NAME,
     host: process.env.DB_HOST,
     dialect: process.env.DB_DIALECT,
   };
@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === "production") {
   dbConfig = {
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME_TEST,
+    database: process.env.DB_NAME,
     host: process.env.DB_HOST,
     dialect: process.env.DB_DIALECT,
   };
@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === "production") {
   dbConfig = {
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME_DEV,
+    database: process.env.DB_NAME,
     host: process.env.DB_HOST,
     dialect: process.env.DB_DIALECT,
   };
