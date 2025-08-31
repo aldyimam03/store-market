@@ -18,4 +18,9 @@ const registerSchema = Joi.object({
   password: Joi.string().min(6).required(),
 });
 
-module.exports = { validate, registerSchema };
+const loginSchema = Joi.object({
+  username: Joi.string().min(2).max(100).required(),
+  password: Joi.string().min(6).required(),
+});
+
+module.exports = { validate, registerSchema, loginSchema };
