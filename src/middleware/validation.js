@@ -34,4 +34,12 @@ const productSchema = Joi.object({
   categoryId: Joi.number().integer().required(),
 });
 
-module.exports = { validate, registerSchema, loginSchema, categorySchema, productSchema };
+const variantSchema = Joi.object({
+  name: Joi.string().min(2).max(100).required(),
+  description: Joi.string().min(2).max(500).required(),
+  price: Joi.number().min(0).required(),
+  stock: Joi.number().min(0).required(),
+  productId: Joi.number().integer().required(),
+});
+
+module.exports = { validate, registerSchema, loginSchema, categorySchema, productSchema, variantSchema };
