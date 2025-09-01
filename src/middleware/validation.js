@@ -23,4 +23,15 @@ const loginSchema = Joi.object({
   password: Joi.string().min(6).required(),
 });
 
-module.exports = { validate, registerSchema, loginSchema };
+const categorySchema = Joi.object({
+  name: Joi.string().min(2).max(100).required(),
+  description: Joi.string().min(2).max(500).required(),
+});
+
+const productSchema = Joi.object({
+  name: Joi.string().min(2).max(100).required(),
+  description: Joi.string().min(2).max(500).required(),
+  categoryId: Joi.number().integer().required(),
+});
+
+module.exports = { validate, registerSchema, loginSchema, categorySchema, productSchema };

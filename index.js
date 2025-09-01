@@ -1,12 +1,16 @@
 const express = require('express');
 const { sequelize, testConnection } = require('./src/config/db/connection');
 const authRoutes = require("./src/routes/authRoutes");
+const categoryRoutes = require("./src/routes/categoryRoutes");
+const productRoutes = require("./src/routes/productRoutes");
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/products", productRoutes);
 
 const startServer = async () => {
   await testConnection();
