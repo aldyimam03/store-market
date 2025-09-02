@@ -14,14 +14,16 @@ const createVariant = async (req, res) => {
     const variantExists = await Variant.findOne({
       where: {
         name: name.trim(),
-        productId: productId
+        productId: productId,
       },
     });
 
     if (variantExists) {
       return res
         .status(409)
-        .json({ error: "Variant with this name already exists for this product" });
+        .json({
+          error: "Variant with this name already exists for this product",
+        });
     }
 
     const { sku, skuPrefix } = await generateSKU(productId, name);
@@ -44,8 +46,21 @@ const createVariant = async (req, res) => {
 
 const getAllVariants = async (req, res) => {
   try {
-    const variants = await Variant.findAll();
-    res.status(200).json(variants);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await Variant.findAndCountAll({
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
+    res.status(200).json({ 
+        totalItem: count,
+        totalPage: Math.ceil(count / limit),
+        currentPage: page,
+        variants: rows
+    });
   } catch (error) {
     console.error("Error fetching variants:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -79,7 +94,9 @@ const updateVariant = async (req, res) => {
     if (productId && productId !== variant.productId) {
       const product = await Product.findByPk(productId);
       if (!product) {
-        return res.status(404).json({ error: `Product with ID ${productId} not found` });
+        return res
+          .status(404)
+          .json({ error: `Product with ID ${productId} not found` });
       }
     }
 
@@ -87,14 +104,14 @@ const updateVariant = async (req, res) => {
       const duplicateVariant = await Variant.findOne({
         where: {
           name: name.trim(),
-          productId: productId || variant.productId, 
-          id: { [require("sequelize").Op.ne]: id } 
+          productId: productId || variant.productId,
+          id: { [require("sequelize").Op.ne]: id },
         },
       });
 
       if (duplicateVariant) {
-        return res.status(409).json({ 
-          error: "Variant with this name already exists for this product" 
+        return res.status(409).json({
+          error: "Variant with this name already exists for this product",
         });
       }
 
@@ -112,11 +129,11 @@ const updateVariant = async (req, res) => {
         return res.status(500).json({ error: "Failed to generate new SKU" });
       }
     } else {
-      await variant.update({ 
-        description, 
-        price, 
-        stock, 
-        productId 
+      await variant.update({
+        description,
+        price,
+        stock,
+        productId,
       });
     }
 

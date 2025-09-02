@@ -29,14 +29,25 @@ const createProduct = async (req, res) => {
 
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.findAll({
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await Product.findAndCountAll({
       include: [{
         model: Category,
         as: 'category',
         attributes: ['id', 'name', 'description']
-      }]
+      }],
+      limit,
+      offset
     });
-    return res.status(200).json(products);
+    return res.status(200).json({
+      totalItem: count,
+      totalPage: Math.ceil(count / limit),
+      currentPage: page,
+      products: rows
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

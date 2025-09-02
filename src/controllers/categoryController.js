@@ -18,8 +18,20 @@ const createCategory = async (req, res) => {
 
 const getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.findAll();
-    return res.status(200).json(categories);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await Category.findAndCountAll({
+      limit,
+      offset
+    });
+    return res.status(200).json({
+      totalItem: count,
+      totalPage: Math.ceil(count / limit),
+      currentPage: page,
+      categories: rows
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
