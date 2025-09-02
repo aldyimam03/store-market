@@ -14,11 +14,7 @@ const generateToken = (payload) => {
 };
 
 const verifyToken = (token) => {
-  try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
-    return new Error("Invalid or expired token");
-  }
+  return jwt.verify(token, JWT_SECRET);
 };
 
 const decodeToken = (token) => {
