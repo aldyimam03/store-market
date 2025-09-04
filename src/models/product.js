@@ -18,6 +18,13 @@ module.exports = (sequelize, DataTypes) => {
         as: "variants",
         onDelete: "CASCADE",
       });
+
+      Product.hasMany(models.CartItem, {
+        foreignKey: "productId",
+        as: "cartItems",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
   Product.init(
