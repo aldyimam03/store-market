@@ -395,14 +395,14 @@ module.exports = {
         },
 
         // Office Supplies Category
-        // Pen (productId: 57)
+        // Pen (productId: 53)
         {
           name: "Ballpoint Pen Blue",
           description: "Pulpen ballpoint tinta biru dengan grip ergonomis",
           price: 8000,
           stock: 1000,
           sku: "OFF-PEN-BALLPOINT-PEN-BLUE-001",
-          productId: 57,
+          productId: 53,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -412,7 +412,7 @@ module.exports = {
           price: 12000,
           stock: 800,
           sku: "OFF-PEN-GEL-PEN-BLACK-002",
-          productId: 57,
+          productId: 53,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -422,7 +422,7 @@ module.exports = {
           price: 450000,
           stock: 25,
           sku: "OFF-PEN-FOUNTAIN-PEN-PREMIUM-003",
-          productId: 57,
+          productId: 53,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
