@@ -1,2 +1,6 @@
 node_modules/
 .env
+
+# Ignore SQLite database
+*.sqlite
+*.sqlite3
