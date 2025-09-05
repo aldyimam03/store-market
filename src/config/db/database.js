@@ -3,21 +3,10 @@ dotenv.config();
 
 let dbConfig;
 
-if (process.env.NODE_ENV === "production") {
+if (process.env.DB_DIALECT === "sqlite") {
   dbConfig = {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    dialect: process.env.DB_DIALECT,
-  };
-} else if (process.env.NODE_ENV === "test") {
-  dbConfig = {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    dialect: process.env.DB_DIALECT,
+    dialect: "sqlite",
+    storage: process.env.DB_STORAGE || "database.sqlite",
   };
 } else {
   dbConfig = {
@@ -25,6 +14,7 @@ if (process.env.NODE_ENV === "production") {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
     dialect: process.env.DB_DIALECT,
   };
 }
