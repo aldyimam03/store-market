@@ -52,7 +52,7 @@ const loginController = async (req, res) => {
       });
     }
 
-    const token = generateToken({ id: user.id, username: user.username });
+    const token = generateToken({ id: user.id, username: user.username , role: user.role });
 
     res.status(200).json({
       message: "Login successful",
