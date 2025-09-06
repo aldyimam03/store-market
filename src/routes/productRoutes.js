@@ -1,24 +1,20 @@
 const express = require("express");
-const {
-  createProduct,
-  getProducts,
-  getProductById,
-  updateProduct,
-  deleteProduct,
-} = require("../controllers/productController");
+const ProductController = require("../controllers/productController");
 const { validate, productSchema } = require("../middleware/validation");
 const authMiddleware = require("../middleware/auth");
 
 const router = express.Router();
 
-router.post("/", validate(productSchema), authMiddleware, createProduct);
-router.get("/", authMiddleware, getProducts);
-router.get("/:id", authMiddleware, getProductById);
-router.put("/:id", validate(productSchema), authMiddleware, updateProduct);
-router.delete("/:id", authMiddleware, deleteProduct);
-
 // Frontend Consumed Routes
-router.get("/public/", getProducts);
-router.get("/public/:id", getProductById);
+router.get("/public/products", ProductController.getProducts);
+router.get("/public/products/:id", ProductController.getProductById);
+
+router.use(authMiddleware); 
+
+router.post("/", validate(productSchema), ProductController.createProduct);
+router.get("/", ProductController.getProducts);
+router.get("/:id", ProductController.getProductById);
+router.put("/:id", validate(productSchema), ProductController.updateProduct);
+router.delete("/:id", ProductController.deleteProduct);
 
 module.exports = router;

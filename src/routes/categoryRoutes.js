@@ -1,24 +1,20 @@
 const express = require("express");
-const {
-  createCategory,
-  getAllCategories,
-  getCategoryById,
-  updateCategory,
-  deleteCategory,
-} = require("../controllers/categoryController");
+const CategoryController = require("../controllers/categoryController");
 const { validate, categorySchema } = require("../middleware/validation");
 const authMiddleware = require("../middleware/auth");
 
 const router = express.Router();
 
-router.post("/", validate(categorySchema), authMiddleware, createCategory);
-router.get("/", authMiddleware, getAllCategories);
-router.get("/:id", authMiddleware, getCategoryById);
-router.put("/:id", validate(categorySchema), authMiddleware, updateCategory);
-router.delete("/:id", authMiddleware, deleteCategory);
-
 // Frontend Consumed Routes
-router.get("/public/", getAllCategories);
-router.get("/public/:id", getCategoryById);
+router.get("/public/", CategoryController.getAllCategories);
+router.get("/public/:id", CategoryController.getCategoryById);
+
+router.use(authMiddleware);
+
+router.post("/", validate(categorySchema), CategoryController.createCategory);
+router.get("/", CategoryController.getAllCategories);
+router.get("/:id", CategoryController.getCategoryById);
+router.put("/:id", validate(categorySchema), CategoryController.updateCategory);
+router.delete("/:id", CategoryController.deleteCategory);
 
 module.exports = router;
