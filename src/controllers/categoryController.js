@@ -1,24 +1,32 @@
 const { Category } = require("../models");
+const {
+  successResponse,
+  createdResponse,
+  internalServerErrorResponse,
+  forbiddenResponse,
+  notFoundResponse,
+  conflictResponse,
+} = require("../utils/responses.js");
 
 class CategoryController {
   static async createCategory(req, res) {
     const { name, description } = req.body;
 
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenResponse(res, "Forbidden");
     }
 
     try {
       const categoryExists = await Category.findOne({ where: { name } });
       if (categoryExists) {
-        return res.status(409).json({ error: "Category already exists" });
+        return conflictResponse(res, "Category already exists");
       }
 
       const category = await Category.create({ name, description });
 
-      return res.status(201).json(category);
+      return createdResponse(res, "Category created successfully", category);
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -32,14 +40,14 @@ class CategoryController {
         limit,
         offset,
       });
-      return res.status(200).json({
+      return successResponse(res, "Categories retrieved successfully", {
         totalItem: count,
         totalPage: Math.ceil(count / limit),
         currentPage: page,
         categories: rows,
       });
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -48,12 +56,12 @@ class CategoryController {
     try {
       const category = await Category.findByPk(id);
       if (category) {
-        return res.status(200).json(category);
+        return successResponse(res, "Category retrieved successfully", category);
       } else {
-        return res.status(404).json({ error: "Category not found" });
+        return notFoundResponse(res, "Category not found");
       }
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -62,7 +70,7 @@ class CategoryController {
     const { name, description } = req.body;
 
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenResponse(res, "Forbidden");
     }
 
     try {
@@ -70,16 +78,16 @@ class CategoryController {
       if (category) {
         const categoryExists = await Category.findOne({ where: { name } });
         if (categoryExists && categoryExists.id !== id) {
-          return res.status(409).json({ error: "Category already exists" });
+          return conflictResponse(res, "Category already exists");
         }
 
         const updatedCategory = await category.update({ name, description });
-        return res.status(200).json(updatedCategory);
+        return successResponse(res, "Category updated successfully", updatedCategory);
       } else {
-        return res.status(404).json({ error: "Category not found" });
+        return notFoundResponse(res, "Category not found");
       }
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -87,21 +95,19 @@ class CategoryController {
     const { id } = req.params;
 
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenResponse(res, "Forbidden");
     }
     
     try {
       const category = await Category.findByPk(id);
       if (category) {
         await category.destroy();
-        return res
-          .status(200)
-          .json({ message: `Category with ID ${id} deleted successfully` });
+        return successResponse(res, `Category with ID ${id} deleted successfully`);
       } else {
-        return res.status(404).json({ error: "Category not found" });
+        return notFoundResponse(res, "Category not found");
       }
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 }
