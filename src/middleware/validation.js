@@ -1,12 +1,10 @@
 const Joi = require("joi");
+const { badRequestResponse } = require("../utils/responses.js");
 
 const validate = (schema) => (req, res, next) => {
   const { error } = schema.validate(req.body);
   if (error) {
-    return res.status(400).json({
-      message: "Validation failed",
-      details: error.details,
-    });
+    return badRequestResponse(res, error.details[0].message);
   }
   next();
 };
@@ -42,4 +40,11 @@ const variantSchema = Joi.object({
   productId: Joi.number().integer().required(),
 });
 
-module.exports = { validate, registerSchema, loginSchema, categorySchema, productSchema, variantSchema };
+module.exports = {
+  validate,
+  registerSchema,
+  loginSchema,
+  categorySchema,
+  productSchema,
+  variantSchema,
+};
