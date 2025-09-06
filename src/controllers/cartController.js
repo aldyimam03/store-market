@@ -1,4 +1,15 @@
+const e = require("express");
 const { Cart, CartItem, Product, Variant, User } = require("../models");
+const {
+  successResponse,
+  createdResponse,
+  errorResponse,
+  internalServerErrorResponse,
+  notFoundResponse,
+  conflictResponse,
+  unauthorizedResponse,
+  badRequestResponse,
+} = require("../utils/responses.js");
 
 class CartController {
   // 1. Mendapatkan cart user beserta semua items
@@ -43,30 +54,18 @@ class CartController {
         return sum + itemPrice * item.quantity;
       }, 0);
 
-      res.json({
-        success: true,
-        data: {
-          cart: {
-            id: cart.id,
-            userId: cart.userId,
-            items: cart.items,
-            totalItems: cart.items.reduce(
-              (sum, item) => sum + item.quantity,
-              0
-            ),
-            totalPrice: total,
-            createdAt: cart.createdAt,
-            updatedAt: cart.updatedAt,
-          },
-        },
+      createdResponse(res, "Cart retrieved successfully", {
+        id: cart.id,
+        userId: cart.userId,
+        items: cart.items,
+        totalItems: cart.items.reduce((sum, item) => sum + item.quantity, 0),
+        totalPrice: total,
+        createdAt: cart.createdAt,
+        updatedAt: cart.updatedAt,
       });
     } catch (error) {
       console.error("Error getting cart:", error);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -78,19 +77,13 @@ class CartController {
 
       // Validasi input
       if (!productId) {
-        return res.status(400).json({
-          success: false,
-          message: "Product ID is required",
-        });
+        return badRequestResponse(res, "Product ID is required");
       }
 
       // Cek apakah product ada
       const product = await Product.findByPk(productId);
       if (!product) {
-        return res.status(404).json({
-          success: false,
-          message: "Product not found",
-        });
+        return notFoundResponse(res, "Product not found");
       }
 
       // Jika ada variantId, cek apakah variant ada dan belong ke product ini
@@ -104,26 +97,23 @@ class CartController {
         });
 
         if (!variant) {
-          return res.status(404).json({
-            success: false,
-            message: "Variant not found for this product",
-          });
+          return notFoundResponse(res, "Variant not found for this product");
         }
 
         // Cek stock variant
         if (variant.stock < quantity) {
-          return res.status(400).json({
-            success: false,
-            message: `Only ${variant.stock} items available in stock`,
-          });
+          return badRequestResponse(
+            res,
+            `Only ${variant.stock} items available in stock`
+          );
         }
       }
 
       // Cari atau buat cart user
-      let cart = await Cart.findOne({ where: { userId } });
-      if (!cart) {
-        cart = await Cart.create({ userId });
-      }
+      let cart = await Cart.findOrCreate({
+        where: { userId },
+        defaults: { userId },
+      }).then(([cart, created]) => cart);
 
       // Cek apakah item sudah ada di cart (same product + variant)
       let cartItem = await CartItem.findOne({
@@ -140,12 +130,12 @@ class CartController {
 
         // Cek stock lagi untuk total quantity
         if (variant && variant.stock < newQuantity) {
-          return res.status(400).json({
-            success: false,
-            message: `Cannot add ${quantity} more items. Only ${
+          return badRequestResponse(
+            res,
+            `Cannot add ${quantity} more items. Only ${
               variant.stock - cartItem.quantity
-            } items available`,
-          });
+            } items available`
+          );
         }
 
         cartItem.quantity = newQuantity;
@@ -183,20 +173,12 @@ class CartController {
         ],
       });
 
-      res.status(201).json({
-        success: true,
-        message: "Item added to cart successfully",
-        data: {
-          cartItem: updatedCartItem,
-        },
+      createdResponse(res, "Item added to cart successfully", {
+        cartItem: updatedCartItem,
       });
     } catch (error) {
       console.error("Error adding to cart:", error);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -209,10 +191,7 @@ class CartController {
 
       // Validasi quantity
       if (!quantity || quantity < 1) {
-        return res.status(400).json({
-          success: false,
-          message: "Quantity must be at least 1",
-        });
+        return badRequestResponse(res, "Quantity must be at least 1");
       }
 
       // Cari cart item yang belong ke user
@@ -233,18 +212,15 @@ class CartController {
       });
 
       if (!cartItem) {
-        return res.status(404).json({
-          success: false,
-          message: "Cart item not found",
-        });
+        return notFoundResponse(res, "Cart item not found");
       }
 
       // Cek stock jika ada variant
       if (cartItem.variant && cartItem.variant.stock < quantity) {
-        return res.status(400).json({
-          success: false,
-          message: `Only ${cartItem.variant.stock} items available in stock`,
-        });
+        return badRequestResponse(
+          res,
+          `Only ${cartItem.variant.stock} items available in stock`
+        );
       }
 
       // Update quantity
@@ -274,20 +250,12 @@ class CartController {
         await cartItem.variant.save();
       }
 
-      res.json({
-        success: true,
-        message: "Cart item updated successfully",
-        data: {
-          cartItem: updatedCartItem,
-        },
+      successResponse(res, "Cart item updated successfully", {
+        cartItem: updatedCartItem,
       });
     } catch (error) {
       console.error("Error updating cart item:", error);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -310,26 +278,16 @@ class CartController {
       });
 
       if (!cartItem) {
-        return res.status(404).json({
-          success: false,
-          message: "Cart item not found",
-        });
+        return notFoundResponse(res, "Cart item not found");
       }
 
       // Hapus cart item
       await cartItem.destroy();
 
-      res.json({
-        success: true,
-        message: "Item removed from cart successfully",
-      });
+      successResponse(res, "Item removed from cart successfully");
     } catch (error) {
       console.error("Error removing cart item:", error);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -342,10 +300,7 @@ class CartController {
       const cart = await Cart.findOne({ where: { userId } });
 
       if (!cart) {
-        return res.status(404).json({
-          success: false,
-          message: "Cart not found",
-        });
+        return notFoundResponse(res, "Cart not found");
       }
 
       // Hapus semua cart items
@@ -353,17 +308,10 @@ class CartController {
         where: { cartId: cart.id },
       });
 
-      res.json({
-        success: true,
-        message: "Cart cleared successfully",
-      });
+      successResponse(res, "Cart cleared successfully");
     } catch (error) {
       console.error("Error clearing cart:", error);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -387,19 +335,12 @@ class CartController {
         ? cart.items.reduce((sum, item) => sum + item.quantity, 0)
         : 0;
 
-      res.json({
-        success: true,
-        data: {
-          count: totalItems,
-        },
+      successResponse(res, "Cart item count retrieved successfully", {
+        count: totalItems,
       });
     } catch (error) {
       console.error("Error getting cart count:", error);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 }
