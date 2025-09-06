@@ -1,32 +1,44 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
+const {
+  successResponse,
+  createdResponse,
+  internalServerErrorResponse,
+  notFoundResponse,
+  conflictResponse,
+  unauthorizedResponse,
+} = require("../utils/responses.js");
 
 class AuthController {
   static async register(req, res) {
     try {
-      const { username, email, password, role } = req.body;
+      const { name, username, email, password, role } = req.body;
+
+      const existingUser = await User.findOne({ where: { username } });
+      if (existingUser) {
+        return conflictResponse(res, "Username already exists");
+      }
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const user = await User.create({
+        name,
         username,
         email,
         password: hashedPassword,
         role: role || "customer",
       });
 
-      res.status(201).json({
-        message: "User registered successfully",
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-        },
+      return createdResponse(res, "User registered successfully", {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        role: user.role,
       });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -36,12 +48,12 @@ class AuthController {
 
       const user = await User.findOne({ where: { username } });
       if (!user) {
-        return res.status(404).json({ message: "Invalid password or username" });
+        return notFoundResponse(res, "User not found");
       }
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid password or username" });
+        return unauthorizedResponse(res, "Invalid password or username");
       }
 
       const token = jwt.sign(
@@ -50,8 +62,7 @@ class AuthController {
         { expiresIn: "1d" }
       );
 
-      res.status(200).json({
-        message: "Login successful",
+      return successResponse(res, "Login successful", {
         token,
         user: {
           id: user.id,
@@ -61,7 +72,7 @@ class AuthController {
         },
       });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -72,12 +83,12 @@ class AuthController {
       });
 
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        return notFoundResponse(res, "User not found");
       }
 
-      res.status(200).json(user);
+      return successResponse(res, "User profile retrieved successfully", user);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 }
