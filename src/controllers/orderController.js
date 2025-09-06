@@ -7,6 +7,14 @@ const {
   Variant,
   User,
 } = require("../models");
+const {
+  successResponse,
+  createdResponse,
+  internalServerErrorResponse,
+  forbiddenResponse,
+  notFoundResponse,
+  conflictResponse,
+} = require("../utils/responses.js");
 
 class OrderController {
   static async createOrder(req, res) {
@@ -30,13 +38,13 @@ class OrderController {
       });
 
       if (!cart || cart.items.length === 0) {
-        return res.status(400).json({ error: "Cart is empty" });
+        return badRequestResponse(res, "Cart is empty");
       }
 
       // 2. Hitung total
       let totalAmount = 0;
       const orderItemsData = cart.items.map((ci) => {
-        const price = ci.variant.price; 
+        const price = ci.variant.price;
         const subtotal = price * ci.quantity;
         totalAmount += subtotal;
 
@@ -66,13 +74,12 @@ class OrderController {
       // 5. Kosongkan cart (optional)
       await CartItem.destroy({ where: { cartId: cart.id } });
 
-      res.status(201).json({
-        message: "Order created successfully",
+      createdResponse(res, "Order created successfully", {
         order,
         items: orderItemsData,
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -94,10 +101,10 @@ class OrderController {
         ],
       });
 
-      return res.json(orders);
+      return successResponse(res, "Orders retrieved successfully", orders);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: "Internal server error" });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -115,16 +122,16 @@ class OrderController {
       });
 
       if (!order) {
-        return res.status(404).json({ error: "Order not found" });
+        return notFoundResponse(res, "Order not found");
       }
 
       if (req.user.role !== "admin" && order.userId !== req.user.id) {
-        return res.status(403).json({ error: "Forbidden" });
+        return forbiddenResponse(res, "Forbidden");
       }
 
-      res.status(200).json(order);
+      return successResponse(res, "Order retrieved successfully", order);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -134,21 +141,19 @@ class OrderController {
       const { status } = req.body;
 
       const order = await Order.findByPk(id);
-      if (!order) return res.status(404).json({ message: "Order not found" });
+      if (!order) return notFoundResponse(res, "Order not found");
 
       if (req.user.role !== "admin") {
-        return res
-          .status(403)
-          .json({ message: "Only admin can update status" });
+        return forbiddenResponse(res, "Only admin can update order status");
       }
 
       order.status = status;
       await order.save();
 
-      return res.json({ message: "Status updated", order });
+      return successResponse(res, "Status updated successfully", order);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: "Internal server error" });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -157,23 +162,23 @@ class OrderController {
       const { id } = req.params;
       const order = await Order.findByPk(id);
 
-      if (!order) return res.status(404).json({ message: "Order not found" });
+      if (!order) return notFoundResponse(res, "Order not found");
 
       if (order.userId !== req.user.id && req.user.role !== "admin") {
-        return res.status(403).json({ message: "Forbidden" });
+        return forbiddenResponse(res, "Forbidden");
       }
 
       if (order.status !== "pending") {
-        return res.status(400).json({ message: "Order cannot be canceled" });
+        return badRequestResponse(res, "Order cannot be canceled");
       }
 
       order.status = "canceled";
       await order.save();
 
-      return res.json({ message: "Order canceled", order });
+      return successResponse(res, "Order canceled successfully", order);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: "Internal server error" });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 }
