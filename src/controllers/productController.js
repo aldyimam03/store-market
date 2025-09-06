@@ -3,6 +3,11 @@ const { Category, Product } = require("../models");
 class ProductController {
   static async createProduct(req, res) {
     const { name, description, categoryId } = req.body;
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     try {
       const categoryExists = await Category.findByPk(categoryId);
       if (!categoryExists) {
@@ -84,6 +89,11 @@ class ProductController {
   static async updateProduct(req, res) {
     const { id } = req.params;
     const { name, description, categoryId } = req.body;
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     try {
       const product = await Product.findByPk(id);
       if (!product) {
@@ -97,7 +107,10 @@ class ProductController {
         }
       }
 
-      if (name && (name !== product.name || categoryId !== product.categoryId)) {
+      if (
+        name &&
+        (name !== product.name || categoryId !== product.categoryId)
+      ) {
         const productExists = await Product.findOne({
           where: {
             name,
@@ -124,6 +137,11 @@ class ProductController {
 
   static async deleteProduct(req, res) {
     const { id } = req.params;
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    
     try {
       const product = await Product.findByPk(id);
       if (!product) {

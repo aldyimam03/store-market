@@ -5,6 +5,11 @@ const { Op } = require("sequelize");
 class VariantController {
   static async createVariant(req, res) {
     const { name, description, price, stock, productId } = req.body;
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     try {
       const product = await Product.findByPk(productId);
       if (!product) {
@@ -88,6 +93,10 @@ class VariantController {
     const { id } = req.params;
     const { name, description, price, stock, productId } = req.body;
 
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     try {
       const variant = await Variant.findByPk(id);
       if (!variant) {
@@ -150,6 +159,11 @@ class VariantController {
 
   static async deleteVariant(req, res) {
     const { id } = req.params;
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     try {
       const variant = await Variant.findByPk(id);
       if (!variant) {

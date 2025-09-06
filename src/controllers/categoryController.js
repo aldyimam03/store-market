@@ -3,6 +3,11 @@ const { Category } = require("../models");
 class CategoryController {
   static async createCategory(req, res) {
     const { name, description } = req.body;
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     try {
       const categoryExists = await Category.findOne({ where: { name } });
       if (categoryExists) {
@@ -55,6 +60,11 @@ class CategoryController {
   static async updateCategory(req, res) {
     const { id } = req.params;
     const { name, description } = req.body;
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     try {
       const category = await Category.findByPk(id);
       if (category) {
@@ -75,6 +85,11 @@ class CategoryController {
 
   static async deleteCategory(req, res) {
     const { id } = req.params;
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    
     try {
       const category = await Category.findByPk(id);
       if (category) {
