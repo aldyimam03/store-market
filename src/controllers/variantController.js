@@ -1,21 +1,27 @@
 const { Product, Variant } = require("../models");
 const { generateSKU } = require("../utils/sku");
 const { Op } = require("sequelize");
+const {
+  successResponse,
+  createdResponse,
+  internalServerErrorResponse,
+  forbiddenResponse,
+  notFoundResponse,
+  conflictResponse,
+} = require("../utils/responses.js");
 
 class VariantController {
   static async createVariant(req, res) {
     const { name, description, price, stock, productId } = req.body;
 
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenResponse(res, "Forbidden");
     }
 
     try {
       const product = await Product.findByPk(productId);
       if (!product) {
-        return res
-          .status(404)
-          .json({ error: `Product with ID ${productId} not found` });
+        return notFoundResponse(res, `Product with ID ${productId} not found`);
       }
 
       const variantExists = await Variant.findOne({
@@ -26,9 +32,10 @@ class VariantController {
       });
 
       if (variantExists) {
-        return res.status(409).json({
-          error: "Variant with this name already exists for this product",
-        });
+        return conflictResponse(
+          res,
+          "Variant with this name already exists for this product"
+        );
       }
 
       const { sku } = await generateSKU(productId, name);
@@ -42,10 +49,10 @@ class VariantController {
         productId,
       });
 
-      res.status(201).json(variant);
+      return createdResponse(res, "Variant created successfully", variant);
     } catch (error) {
       console.error("Error creating variant:", error);
-      res.status(500).json({ error: "Internal server error" });
+      return internalServerErrorResponse(res, "Internal server error");
     }
   }
 
@@ -61,7 +68,7 @@ class VariantController {
         order: [["createdAt", "DESC"]],
       });
 
-      res.status(200).json({
+      return successResponse(res, "Variants retrieved successfully", {
         totalItem: count,
         totalPage: Math.ceil(count / limit),
         currentPage: page,
@@ -69,7 +76,7 @@ class VariantController {
       });
     } catch (error) {
       console.error("Error fetching variants:", error);
-      res.status(500).json({ error: "Internal server error" });
+      return internalServerErrorResponse(res, "Internal server error");
     }
   }
 
@@ -78,14 +85,12 @@ class VariantController {
     try {
       const variant = await Variant.findByPk(id);
       if (!variant) {
-        return res
-          .status(404)
-          .json({ error: `Variant with ID ${id} not found` });
+        return notFoundResponse(res, `Variant with ID ${id} not found`);
       }
-      res.status(200).json(variant);
+      return successResponse(res, "Variant retrieved successfully", variant);
     } catch (error) {
       console.error("Error fetching variant:", error);
-      res.status(500).json({ error: "Internal server error" });
+      return internalServerErrorResponse(res, "Internal server error");
     }
   }
 
@@ -94,21 +99,22 @@ class VariantController {
     const { name, description, price, stock, productId } = req.body;
 
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenResponse(res, "Forbidden");
     }
 
     try {
       const variant = await Variant.findByPk(id);
       if (!variant) {
-        return res.status(404).json({ error: `Variant with ID ${id} not found` });
+        return notFoundResponse(res, `Variant with ID ${id} not found`);
       }
 
       if (productId && productId !== variant.productId) {
         const product = await Product.findByPk(productId);
         if (!product) {
-          return res
-            .status(404)
-            .json({ error: `Product with ID ${productId} not found` });
+          return notFoundResponse(
+            res,
+            `Product with ID ${productId} not found`
+          );
         }
       }
 
@@ -122,13 +128,17 @@ class VariantController {
         });
 
         if (duplicateVariant) {
-          return res.status(409).json({
-            error: "Variant with this name already exists for this product",
-          });
+          return conflictResponse(
+            res,
+            "Variant with this name already exists for this product"
+          );
         }
 
         try {
-          const { sku } = await generateSKU(productId || variant.productId, name);
+          const { sku } = await generateSKU(
+            productId || variant.productId,
+            name
+          );
           await variant.update({
             name: name.trim(),
             description,
@@ -137,8 +147,12 @@ class VariantController {
             productId,
             sku,
           });
-        } catch (err) {
-          return res.status(500).json({ error: "Failed to generate new SKU" });
+        } catch (error) {
+          return internalServerErrorResponse(
+            res,
+            "Failed to generate new SKU",
+            error.message
+          );
         }
       } else {
         await variant.update({
@@ -150,10 +164,18 @@ class VariantController {
       }
 
       const updatedVariant = await Variant.findByPk(id);
-      res.status(200).json(updatedVariant);
+      return successResponse(
+        res,
+        "Variant updated successfully",
+        updatedVariant
+      );
     } catch (error) {
       console.error("Error updating variant:", error);
-      res.status(500).json({ error: "Internal server error" });
+      return internalServerErrorResponse(
+        res,
+        "Internal server error",
+        error.message
+      );
     }
   }
 
@@ -161,23 +183,23 @@ class VariantController {
     const { id } = req.params;
 
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenResponse(res, "Forbidden");
     }
 
     try {
       const variant = await Variant.findByPk(id);
       if (!variant) {
-        return res
-          .status(404)
-          .json({ error: `Variant with ID ${id} not found` });
+        return notFoundResponse(res, `Variant with ID ${id} not found`);
       }
       await variant.destroy();
-      res
-        .status(200)
-        .json({ message: `Variant with ID ${id} deleted successfully` });
+      return successResponse(res, `Variant with ID ${id} deleted successfully`);
     } catch (error) {
       console.error("Error deleting variant:", error);
-      res.status(500).json({ error: "Internal server error" });
+      return internalServerErrorResponse(
+        res,
+        "Internal server error",
+        error.message
+      );
     }
   }
 }
