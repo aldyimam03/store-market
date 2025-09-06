@@ -1,17 +1,25 @@
 const { Category, Product } = require("../models");
+const {
+  successResponse,
+  createdResponse,
+  internalServerErrorResponse,
+  forbiddenResponse,
+  notFoundResponse,
+  conflictResponse,
+} = require("../utils/responses.js");
 
 class ProductController {
   static async createProduct(req, res) {
     const { name, description, categoryId } = req.body;
 
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenResponse(res, "Forbidden");
     }
 
     try {
       const categoryExists = await Category.findByPk(categoryId);
       if (!categoryExists) {
-        return res.status(404).json({ error: "Category not found" });
+        return notFoundResponse(res, "Category not found");
       }
 
       const productExists = await Product.findOne({
@@ -21,16 +29,14 @@ class ProductController {
         },
       });
       if (productExists) {
-        return res
-          .status(409)
-          .json({ error: "Product already exists in this category" });
+        return conflictResponse(res, "Product already exists in this category");
       }
 
       const product = await Product.create({ name, description, categoryId });
 
-      return res.status(201).json(product);
+      return createdResponse(res, "Product created successfully", product);
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -52,14 +58,14 @@ class ProductController {
         offset,
       });
 
-      return res.status(200).json({
+      return successResponse(res, "Products retrieved successfully", {
         totalItem: count,
         totalPage: Math.ceil(count / limit),
         currentPage: page,
         products: rows,
       });
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -77,12 +83,12 @@ class ProductController {
       });
 
       if (product) {
-        return res.status(200).json(product);
+        return successResponse(res, "Product retrieved successfully", product);
       } else {
-        return res.status(404).json({ error: "Product not found" });
+        return notFoundResponse(res, "Product not found");
       }
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -91,19 +97,19 @@ class ProductController {
     const { name, description, categoryId } = req.body;
 
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenResponse(res, "Forbidden");
     }
 
     try {
       const product = await Product.findByPk(id);
       if (!product) {
-        return res.status(404).json({ error: "Product not found" });
+        return notFoundResponse(res, "Product not found");
       }
 
       if (categoryId && categoryId !== product.categoryId) {
         const categoryExists = await Category.findByPk(categoryId);
         if (!categoryExists) {
-          return res.status(404).json({ error: "Category not found" });
+          return notFoundResponse(res, "Category not found");
         }
       }
 
@@ -118,9 +124,10 @@ class ProductController {
           },
         });
         if (productExists && productExists.id != id) {
-          return res.status(409).json({
-            error: "Product with this name already exists in this category",
-          });
+          return conflictResponse(
+            res,
+            "Product with this name already exists in this category"
+          );
         }
       }
 
@@ -129,9 +136,13 @@ class ProductController {
         description,
         categoryId,
       });
-      return res.status(200).json(updatedProduct);
+      return successResponse(
+        res,
+        "Product updated successfully",
+        updatedProduct
+      );
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
@@ -139,21 +150,19 @@ class ProductController {
     const { id } = req.params;
 
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenResponse(res, "Forbidden");
     }
-    
+
     try {
       const product = await Product.findByPk(id);
       if (!product) {
-        return res.status(404).json({ error: "Product not found" });
+        return notFoundResponse(res, "Product not found");
       }
 
       await product.destroy();
-      return res
-        .status(200)
-        .json({ message: `Product with ID ${id} deleted successfully` });
+      return successResponse(res, `Product with ID ${id} deleted successfully`);
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return internalServerErrorResponse(res, error.message);
     }
   }
 }
