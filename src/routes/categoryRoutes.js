@@ -14,6 +14,7 @@ router.use(authMiddleware);
 router.post("/", validate(categorySchema), CategoryController.createCategory);
 router.get("/", CategoryController.getAllCategories);
 router.get("/:id", CategoryController.getCategoryById);
+router.get("/search/by-name", CategoryController.getCategoryByName);
 router.put("/:id", validate(categorySchema), CategoryController.updateCategory);
 router.delete("/:id", CategoryController.deleteCategory);
 

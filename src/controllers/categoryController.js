@@ -7,6 +7,7 @@ const {
   notFoundResponse,
   conflictResponse,
 } = require("../utils/responses.js");
+const { Op } = require("sequelize");
 
 class CategoryController {
   static async createCategory(req, res) {
@@ -56,9 +57,33 @@ class CategoryController {
     try {
       const category = await Category.findByPk(id);
       if (category) {
-        return successResponse(res, "Category retrieved successfully", category);
+        return successResponse(
+          res,
+          "Category retrieved successfully",
+          category
+        );
       } else {
-        return notFoundResponse(res, "Category not found");
+        return notFoundResponse(res, `Category with this id ${id} not found`);
+      }
+    } catch (error) {
+      return internalServerErrorResponse(res, error.message);
+    }
+  }
+
+  static async getCategoryByName(req, res) {
+    const { name } = req.query;
+    try {
+      const category = await Category.findOne({
+        where: { name: { [Op.iLike]: `%${name}%` } },
+      });
+      if (category) {
+        return successResponse(
+          res,
+          "Category retrieved successfully",
+          category
+        );
+      } else {
+        return notFoundResponse(res, `Category not found with name ${name}`);
       }
     } catch (error) {
       return internalServerErrorResponse(res, error.message);
@@ -82,7 +107,11 @@ class CategoryController {
         }
 
         const updatedCategory = await category.update({ name, description });
-        return successResponse(res, "Category updated successfully", updatedCategory);
+        return successResponse(
+          res,
+          "Category updated successfully",
+          updatedCategory
+        );
       } else {
         return notFoundResponse(res, "Category not found");
       }
@@ -97,12 +126,15 @@ class CategoryController {
     if (req.user.role !== "admin") {
       return forbiddenResponse(res, "Forbidden");
     }
-    
+
     try {
       const category = await Category.findByPk(id);
       if (category) {
         await category.destroy();
-        return successResponse(res, `Category with ID ${id} deleted successfully`);
+        return successResponse(
+          res,
+          `Category with ID ${id} deleted successfully`
+        );
       } else {
         return notFoundResponse(res, "Category not found");
       }

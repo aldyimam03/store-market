@@ -7,6 +7,7 @@ const {
   notFoundResponse,
   conflictResponse,
 } = require("../utils/responses.js");
+const { Op } = require("sequelize");
 
 class ProductController {
   static async createProduct(req, res) {
@@ -87,6 +88,28 @@ class ProductController {
       } else {
         return notFoundResponse(res, "Product not found");
       }
+    } catch (error) {
+      return internalServerErrorResponse(res, error.message);
+    }
+  }
+
+  static async getProductsByName(req, res) {
+    const { name } = req.query;
+    try {
+      const products = await Product.findAll({
+        where: { name: { [Op.iLike]: `%${name}%` } },
+        include: [
+          {
+            model: Category,
+            as: "category",
+            attributes: ["id", "name", "description"],
+          },
+        ],
+      });
+      if (products.length === 0) {
+        return notFoundResponse(res, `Products not found with this name ${name}`);
+      }
+      return successResponse(res, "Products retrieved successfully", products);
     } catch (error) {
       return internalServerErrorResponse(res, error.message);
     }

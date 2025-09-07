@@ -94,6 +94,22 @@ class VariantController {
     }
   }
 
+  static async getVariantByName(req, res) {
+    const { name } = req.query;
+    try {
+      const variant = await Variant.findAll({
+        where: { name: { [Op.iLike]: `%${name}%` } },
+      });
+      if (variant.length === 0) {
+        return notFoundResponse(res, `Variant with name ${name} not found`);
+      }
+      return successResponse(res, "Variant retrieved successfully", variant);
+    } catch (error) {
+      console.error("Error fetching variant:", error);
+      return internalServerErrorResponse(res, "Internal server error");
+    }
+  }
+
   static async updateVariant(req, res) {
     const { id } = req.params;
     const { name, description, price, stock, productId } = req.body;

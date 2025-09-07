@@ -14,6 +14,7 @@ router.use(authMiddleware);
 router.post("/", validate(variantSchema), VariantController.createVariant);
 router.get("/", VariantController.getAllVariants);
 router.get("/:id", VariantController.getVariantById);
+router.get("/search/by-name", VariantController.getVariantByName);
 router.put("/:id", validate(variantSchema), VariantController.updateVariant);
 router.delete("/:id", VariantController.deleteVariant);
 
