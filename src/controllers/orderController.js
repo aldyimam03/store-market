@@ -64,9 +64,12 @@ class OrderController {
         };
       });
 
-      const paymentMethodRecord = await PaymentMethod.findOne({
-        where: { id: paymentMethodId },
-      });
+      const paymentMethodRecord = await PaymentMethod.findByPk(
+        paymentMethodId,
+        {
+          attributes: ["id", "name"],
+        }
+      );
       if (!paymentMethodRecord) {
         return notFoundResponse(res, "Payment method not found");
       }
@@ -80,16 +83,25 @@ class OrderController {
         shippingAddress,
       });
 
-      // 4. Masukkan order items
+      // 5. Masukkan order items
       for (const item of orderItemsData) {
         await OrderItem.create({ ...item, orderId: order.id });
       }
 
-      // 5. Kosongkan cart (optional)
+      // 6. Kosongkan cart (optional)
       await CartItem.destroy({ where: { cartId: cart.id } });
 
+      // 7. Format response dengan menambahkan paymentMethod object
+      const orderResponse = {
+        ...order.toJSON(),
+        paymentMethod: {
+          id: paymentMethodRecord.id,
+          name: paymentMethodRecord.name,
+        },
+      };
+
       createdResponse(res, "Order created successfully", {
-        order,
+        order: orderResponse,
         items: orderItemsData,
       });
     } catch (error) {
