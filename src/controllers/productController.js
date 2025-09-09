@@ -96,7 +96,11 @@ class ProductController {
   static async getProductsByName(req, res) {
     const { name } = req.query;
     try {
-      const products = await Product.findAll({
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const offset = (page - 1) * limit;
+
+      const { count, rows } = await Product.findAndCountAll({
         where: { name: { [Op.iLike]: `%${name}%` } },
         include: [
           {
@@ -105,11 +109,23 @@ class ProductController {
             attributes: ["id", "name", "description"],
           },
         ],
+        limit,
+        offset,
       });
-      if (products.length === 0) {
-        return notFoundResponse(res, `Products not found with this name ${name}`);
+
+      if (rows.length === 0) {
+        return notFoundResponse(
+          res,
+          `Products not found with this name ${name}`
+        );
       }
-      return successResponse(res, "Products retrieved successfully", products);
+
+      return successResponse(res, "Products retrieved successfully", {
+        totalProducts: count,
+        totalPage: Math.ceil(count / limit),
+        currentPage: page,
+        products: rows,
+      });
     } catch (error) {
       return internalServerErrorResponse(res, error.message);
     }
