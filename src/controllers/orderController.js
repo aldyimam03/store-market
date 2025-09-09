@@ -6,6 +6,7 @@ const {
   Product,
   Variant,
   User,
+  PaymentMethod,
 } = require("../models");
 const {
   successResponse,
@@ -13,6 +14,7 @@ const {
   internalServerErrorResponse,
   forbiddenResponse,
   notFoundResponse,
+  badRequestResponse,
 } = require("../utils/responses.js");
 
 class OrderController {
@@ -25,7 +27,7 @@ class OrderController {
         return notFoundResponse(res, "User not found");
       }
 
-      const { cartId, paymentMethod, shippingAddress } = req.body;
+      const { cartId, paymentMethodId, shippingAddress } = req.body;
 
       // 1. Ambil cart user
       const cart = await Cart.findOne({
@@ -62,12 +64,19 @@ class OrderController {
         };
       });
 
+      const paymentMethodRecord = await PaymentMethod.findOne({
+        where: { id: paymentMethodId },
+      });
+      if (!paymentMethodRecord) {
+        return notFoundResponse(res, "Payment method not found");
+      }
+
       // 3. Buat order
       const order = await Order.create({
         userId,
         status: "pending",
         totalAmount,
-        paymentMethod,
+        paymentMethodId,
         shippingAddress,
       });
 
