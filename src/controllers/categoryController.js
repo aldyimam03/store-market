@@ -57,11 +57,7 @@ class CategoryController {
     try {
       const category = await Category.findByPk(id);
       if (category) {
-        return successResponse(
-          res,
-          "Category retrieved successfully",
-          category
-        );
+        return successResponse(res, "Category retrieved successfully", {});
       } else {
         return notFoundResponse(res, `Category with this id ${id} not found`);
       }
@@ -73,15 +69,23 @@ class CategoryController {
   static async getCategoryByName(req, res) {
     const { name } = req.query;
     try {
-      const category = await Category.findOne({
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const offset = (page - 1) * limit;
+
+      const { count, rows } = await Category.findAndCountAll({
         where: { name: { [Op.iLike]: `%${name}%` } },
+        limit,
+        offset,
       });
-      if (category) {
-        return successResponse(
-          res,
-          "Category retrieved successfully",
-          category
-        );
+
+      if (rows.length > 0) {
+        return successResponse(res, "Categories retrieved successfully", {
+          totalCategories: count,
+          totalPage: Math.ceil(count / limit),
+          currentPage: page,
+          categories: rows,
+        });
       } else {
         return notFoundResponse(res, `Category not found with name ${name}`);
       }
