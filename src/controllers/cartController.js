@@ -3,11 +3,8 @@ const { Cart, CartItem, Product, Variant, User } = require("../models");
 const {
   successResponse,
   createdResponse,
-  errorResponse,
   internalServerErrorResponse,
   notFoundResponse,
-  conflictResponse,
-  unauthorizedResponse,
   badRequestResponse,
 } = require("../utils/responses.js");
 
@@ -16,6 +13,11 @@ class CartController {
   static async getCart(req, res) {
     try {
       const userId = req.user.id; // Dari middleware auth
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return notFoundResponse(res, "User not found");
+      }
 
       let cart = await Cart.findOne({
         where: { userId },
@@ -73,6 +75,11 @@ class CartController {
   static async addToCart(req, res) {
     try {
       const userId = req.user.id;
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return notFoundResponse(res, "User not found");
+      }
       const { productId, variantId, quantity = 1 } = req.body;
 
       // Validasi input
@@ -186,6 +193,12 @@ class CartController {
   static async updateCartItem(req, res) {
     try {
       const userId = req.user.id;
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return notFoundResponse(res, "User not found");
+      }
+
       const { cartItemId } = req.params;
       const { quantity } = req.body;
 
@@ -263,6 +276,12 @@ class CartController {
   static async removeCartItem(req, res) {
     try {
       const userId = req.user.id;
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return notFoundResponse(res, "User not found");
+      }
+
       const { cartItemId } = req.params;
 
       // Cari cart item yang belong ke user
@@ -296,6 +315,11 @@ class CartController {
     try {
       const userId = req.user.id;
 
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return notFoundResponse(res, "User not found");
+      }
+
       // Cari cart user
       const cart = await Cart.findOne({ where: { userId } });
 
@@ -319,6 +343,11 @@ class CartController {
   static async getCartCount(req, res) {
     try {
       const userId = req.user.id;
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return notFoundResponse(res, "User not found");
+      }
 
       const cart = await Cart.findOne({
         where: { userId },

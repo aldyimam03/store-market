@@ -13,13 +13,18 @@ const {
   internalServerErrorResponse,
   forbiddenResponse,
   notFoundResponse,
-  conflictResponse,
 } = require("../utils/responses.js");
 
 class OrderController {
   static async createOrder(req, res) {
     try {
       const userId = req.user.id;
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return notFoundResponse(res, "User not found");
+      }
+
       const { cartId, paymentMethod, shippingAddress } = req.body;
 
       // 1. Ambil cart user
@@ -86,6 +91,12 @@ class OrderController {
   static async getOrders(req, res) {
     try {
       const userId = req.user.id;
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return notFoundResponse(res, "User not found");
+      }
+
       const role = req.user.role;
 
       const where = role === "admin" ? {} : { userId };
