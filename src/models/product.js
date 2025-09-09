@@ -29,12 +29,17 @@ module.exports = (sequelize, DataTypes) => {
   }
   Product.init(
     {
-      name: { type: DataTypes.STRING, allowNull: false },
-      description: { type: DataTypes.STRING, allowNull: true },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      description: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       categoryId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Categories", key: "id" },
       },
     },
     {

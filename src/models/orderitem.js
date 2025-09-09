@@ -8,9 +8,18 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      OrderItem.belongsTo(models.Order, { foreignKey: "orderId" });
-      OrderItem.belongsTo(models.Product, { foreignKey: "productId" });
-      OrderItem.belongsTo(models.Variant, { foreignKey: "variantId" });
+      OrderItem.belongsTo(models.Order, {
+        foreignKey: "orderId",
+        as: "order",
+      });
+      OrderItem.belongsTo(models.Product, {
+        foreignKey: "productId",
+        as: "product",
+      });
+      OrderItem.belongsTo(models.Variant, {
+        foreignKey: "variantId",
+        as: "variant",
+      });
     }
   }
   OrderItem.init(
@@ -18,21 +27,28 @@ module.exports = (sequelize, DataTypes) => {
       orderId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Orders", key: "id" },
       },
       productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Products", key: "id" },
       },
       variantId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Variants", key: "id" },
       },
-      price: { type: DataTypes.DECIMAL, allowNull: false },
-      quantity: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
-      subtotal: { type: DataTypes.DECIMAL, allowNull: false },
+      price: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+      },
+      quantity: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1,
+      },
+      subtotal: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+      },
     },
     {
       sequelize,

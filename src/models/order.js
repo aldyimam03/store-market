@@ -8,8 +8,12 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Order.belongsTo(models.User, { foreignKey: "userId" });
-      Order.hasMany(models.OrderItem, { foreignKey: "orderId" });
+      Order.belongsTo(models.User, {
+        foreignKey: "userId",
+      });
+      Order.hasMany(models.OrderItem, {
+        foreignKey: "orderId",
+      });
     }
   }
   Order.init(
@@ -17,7 +21,6 @@ module.exports = (sequelize, DataTypes) => {
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Users", key: "id" },
       },
       status: {
         type: DataTypes.ENUM,
@@ -32,9 +35,18 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: "pending",
         allowNull: false,
       },
-      totalAmount: { type: DataTypes.DECIMAL, allowNull: false },
-      paymentMethod: { type: DataTypes.STRING, allowNull: false },
-      shippingAddress: { type: DataTypes.TEXT, allowNull: false },
+      totalAmount: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+      },
+      paymentMethod: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      shippingAddress: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      },
     },
     {
       sequelize,

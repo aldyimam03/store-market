@@ -24,15 +24,32 @@ module.exports = (sequelize, DataTypes) => {
   }
   Variant.init(
     {
-      name: { type: DataTypes.STRING, allowNull: false },
-      description: { type: DataTypes.TEXT, allowNull: true },
-      price: { type: DataTypes.DECIMAL, allowNull: false, defaultValue: 0 },
-      stock: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
-      sku: { type: DataTypes.STRING, allowNull: true, unique: true },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      price: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      stock: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      sku: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true,
+      },
       productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Products", key: "id" },
       },
     },
     {
