@@ -97,16 +97,29 @@ class VariantController {
   static async getVariantByName(req, res) {
     const { name } = req.query;
     try {
-      const variant = await Variant.findAll({
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const offset = (page - 1) * limit;
+
+      const { count, rows } = await Variant.findAndCountAll({
         where: { name: { [Op.iLike]: `%${name}%` } },
+        limit,
+        offset,
       });
-      if (variant.length === 0) {
+
+      if (rows.length === 0) {
         return notFoundResponse(res, `Variant with name ${name} not found`);
       }
-      return successResponse(res, "Variant retrieved successfully", variant);
+
+      return successResponse(res, "Variants retrieved successfully", {
+        totalVariants: count,
+        totalPage: Math.ceil(count / limit),
+        currentPage: page,
+        variants: rows,
+      });
     } catch (error) {
       console.error("Error fetching variant:", error);
-      return internalServerErrorResponse(res, "Internal server error");
+      return internalServerErrorResponse(res, error.message);
     }
   }
 
