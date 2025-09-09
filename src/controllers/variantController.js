@@ -125,7 +125,7 @@ class VariantController {
 
   static async updateVariant(req, res) {
     const { id } = req.params;
-    const { name, description, price, stock, productId } = req.body;
+    const { name, description, price, stock, productId } = req.body || {};
 
     if (req.user.role !== "admin") {
       return forbiddenResponse(res, "Forbidden");
