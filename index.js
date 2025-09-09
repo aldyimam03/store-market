@@ -6,6 +6,7 @@ const productRoutes = require("./src/routes/productRoutes");
 const variantRoutes = require("./src/routes/variantRoutes");
 const cartRoutes = require("./src/routes/cartRoutes");
 const orderRoutes = require("./src/routes/orderRoutes");
+const paymentMethodRoutes = require("./src/routes/paymentMethod");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -17,6 +18,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/variants", variantRoutes);
 app.use("/api/carts", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/payment-methods", paymentMethodRoutes);
 
 const startServer = async () => {
   await testConnection();

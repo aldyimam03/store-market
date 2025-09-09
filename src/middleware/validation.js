@@ -40,10 +40,15 @@ const variantSchema = Joi.object({
   productId: Joi.number().integer().required(),
 });
 
+const paymentMethodSchema = Joi.object({
+  name: Joi.string().min(2).max(100).required(),
+});
+
 module.exports = {
   validate,
   registerSchema,
   loginSchema,
+  paymentMethodSchema,
   categorySchema,
   productSchema,
   variantSchema,

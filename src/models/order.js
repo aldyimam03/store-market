@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
       Order.hasMany(models.OrderItem, {
         foreignKey: "orderId",
       });
+      Order.belongsTo(models.PaymentMethod, {
+        foreignKey: "paymentMethodId",
+        as: "paymentMethod",
+      });
     }
   }
   Order.init(
@@ -39,8 +43,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DECIMAL,
         allowNull: false,
       },
-      paymentMethod: {
-        type: DataTypes.STRING,
+      paymentMethodId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       shippingAddress: {

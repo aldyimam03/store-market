@@ -30,9 +30,15 @@ module.exports = {
         type: Sequelize.DECIMAL,
         allowNull: false
       },
-      paymentMethod: {
-        type: Sequelize.STRING,
-        allowNull: false
+      paymentMethodId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'PaymentMethods',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
       },
       shippingAddress: {
         type: Sequelize.TEXT,
