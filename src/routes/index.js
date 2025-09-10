@@ -8,7 +8,6 @@ const orderRoutes = require("../routes/orderRoutes");
 const paymentMethodRoutes = require("../routes/paymentMethod");
 
 const router = express.Router();
-router.use(express.json());
 
 router.use("/auth", authRoutes);
 router.use("/categories", categoryRoutes);
