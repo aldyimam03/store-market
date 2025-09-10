@@ -1,12 +1,17 @@
 const express = require("express");
 const { testConnection } = require("../config/db/connection");
 const routes = require("../routes/index.js");
+const { notFoundResponse } = require("../utils/responses");
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+
 app.use("/api", routes);
+app.use((res, req, next) => {
+  notFoundResponse(res, "Route not found");
+});
 
 const startServer = async () => {
   await testConnection();
