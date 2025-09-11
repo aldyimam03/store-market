@@ -12,7 +12,7 @@ const {
 
 class VariantController {
   static async createVariant(req, res) {
-    const { name, description, price, stock, productId } = req.body;
+    const { name, image, description, price, stock, productId } = req.body;
 
     if (req.user.role !== "admin") {
       return forbiddenResponse(res, "Forbidden");
@@ -42,6 +42,7 @@ class VariantController {
 
       const variant = await Variant.create({
         name: name.trim(),
+        image,
         description,
         price,
         stock,
@@ -125,7 +126,7 @@ class VariantController {
 
   static async updateVariant(req, res) {
     const { id } = req.params;
-    const { name, description, price, stock, productId } = req.body || {};
+    const { name, image, description, price, stock, productId } = req.body || {};
 
     if (req.user.role !== "admin") {
       return forbiddenResponse(res, "Forbidden");
@@ -170,6 +171,7 @@ class VariantController {
           );
           await variant.update({
             name: name.trim(),
+            image,
             description,
             price,
             stock,

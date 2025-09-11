@@ -23,17 +23,20 @@ const loginSchema = Joi.object({
 
 const categorySchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
+  image: Joi.string().min(2).max(100).required(),
   description: Joi.string().min(2).max(500).required(),
 });
 
 const productSchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
+  image: Joi.string().min(2).max(100).required(),
   description: Joi.string().min(2).max(500).required(),
   categoryId: Joi.number().integer().required(),
 });
 
 const variantSchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
+  image: Joi.string().min(2).max(100).required(),
   description: Joi.string().min(2).max(500).required(),
   price: Joi.number().min(0).required(),
   stock: Joi.number().min(0).required(),

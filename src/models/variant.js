@@ -28,6 +28,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      image: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-76DDUbZf_DdfcQw4-qFsL1ZETOjGKtfDkg&s",
+      },
       description: {
         type: DataTypes.TEXT,
         allowNull: true,

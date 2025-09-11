@@ -11,7 +11,7 @@ const { Op } = require("sequelize");
 
 class CategoryController {
   static async createCategory(req, res) {
-    const { name, description } = req.body;
+    const { name, image, description } = req.body;
 
     if (req.user.role !== "admin") {
       return forbiddenResponse(res, "Forbidden");
@@ -23,7 +23,7 @@ class CategoryController {
         return conflictResponse(res, "Category already exists");
       }
 
-      const category = await Category.create({ name, description });
+      const category = await Category.create({ name, image, description });
 
       return createdResponse(res, "Category created successfully", category);
     } catch (error) {
@@ -96,7 +96,7 @@ class CategoryController {
 
   static async updateCategory(req, res) {
     const { id } = req.params;
-    const { name, description } = req.body;
+    const { name, image, description } = req.body;
 
     if (req.user.role !== "admin") {
       return forbiddenResponse(res, "Forbidden");
@@ -110,7 +110,7 @@ class CategoryController {
           return conflictResponse(res, "Category already exists");
         }
 
-        const updatedCategory = await category.update({ name, description });
+        const updatedCategory = await category.update({ name, image, description });
         return successResponse(
           res,
           "Category updated successfully",

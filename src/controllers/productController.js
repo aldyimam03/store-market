@@ -11,7 +11,7 @@ const { Op } = require("sequelize");
 
 class ProductController {
   static async createProduct(req, res) {
-    const { name, description, categoryId } = req.body;
+    const { name, image, description, categoryId } = req.body;
 
     if (req.user.role !== "admin") {
       return forbiddenResponse(res, "Forbidden");
@@ -33,7 +33,7 @@ class ProductController {
         return conflictResponse(res, "Product already exists in this category");
       }
 
-      const product = await Product.create({ name, description, categoryId });
+      const product = await Product.create({ name, image, description, categoryId });
 
       return createdResponse(res, "Product created successfully", product);
     } catch (error) {
@@ -133,7 +133,7 @@ class ProductController {
 
   static async updateProduct(req, res) {
     const { id } = req.params;
-    const { name, description, categoryId } = req.body;
+    const { name, image, description, categoryId } = req.body;
 
     if (req.user.role !== "admin") {
       return forbiddenResponse(res, "Forbidden");
@@ -172,6 +172,7 @@ class ProductController {
 
       const updatedProduct = await product.update({
         name,
+        image,
         description,
         categoryId,
       });
