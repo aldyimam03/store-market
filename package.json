@@ -11,11 +11,12 @@
     "reset": "npm run migrate:undo && npm run migrate && npm run seed"
   },
   "keywords": [],
-  "author": "",
+  "author": "Aldy Imam Wijaya",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "joi": "^18.0.1",
