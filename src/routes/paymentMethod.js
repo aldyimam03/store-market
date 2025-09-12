@@ -4,6 +4,9 @@ const router = express.Router();
 const authMiddleware = require("../middleware/auth");
 const { validate, paymentMethodSchema } = require("../middleware/validation");
 
+router.get("/public/", PaymentMethodController.getAllPaymentMethods);
+router.get("/public/:id", PaymentMethodController.getPaymentMethodById);
+
 router.use(authMiddleware);
 
 router.post(
